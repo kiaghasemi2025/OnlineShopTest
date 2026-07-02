@@ -1,7 +1,6 @@
 const product = require('../models/product')
 const Product = require('../models/product')
 const { validationResult } = require('express-validator')
-const fileHelper = require('../util/fileHelper')
 
 exports.getAddProduct = (req, res) => {
     res.render('admin/add-product', {
@@ -191,7 +190,6 @@ exports.postEditProduct = (req, res, next) => {
             product.title = updatedTitle;
             product.price = updatedPrice;
             if (image) {
-                fileHelper.deleteFile(product.imageUrl)
                 product.imageUrl = image.path;
             }
             product.description = updatedDescription
@@ -213,17 +211,15 @@ exports.postEditProduct = (req, res, next) => {
 }
 exports.postDeleteProduct = (req, res, next) => {
     let prodID = req.body.productId
-    Product.findById(prodID).then(product => {
-        fileHelper.deleteFile(product.imageUrl)
-        return Product.deleteOne({ _id: prodID, userId: req.user._id })
-    }).then(product => {
-        req.flash('success', 'محصول مورد نظر حذف شد')
-        res.redirect('/admin/products')
-    }).catch(err => {
-        const error = new Error(err)
-        error.httpStatusCode = 500;
-        return next(error)
-    })
+    Product.deleteOne({ _id: prodID, userId: req.user._id })
+        .then(product => {
+            req.flash('success', 'محصول مورد نظر حذف شد')
+            res.redirect('/admin/products')
+        }).catch(err => {
+            const error = new Error(err)
+            error.httpStatusCode = 500;
+            return next(error)
+        })
 }
 
 
