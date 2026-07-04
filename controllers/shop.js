@@ -5,30 +5,48 @@ const { generateToken } = require('../middleware/csrf')
 const path = require('path')
 const fs = require('fs')
 const pdfDocument = require('pdfkit')
+const { query } = require('express-validator')
+const ItemsPerPage = 1
+let allItems;
 
 exports.getShop = (req, res, next) => {
-
+    let page = +req.query.page || 1;
+    
     let massage = req.flash('success')
     if (massage.length > 0) {
         massage = massage[0]
     } else {
         massage = null
     }
-    Product.find().then(product => {
-        res.render('shop/index', {
-            path: '/',
-            pageTitle: 'Shop',
-            prods: product,
-            isAuthenticated: req.session.isLoggedin,
-            successMassage: massage
-        });
-    }).catch(err => {
+    Product.find()
+        .countDocuments()
+        .then(allProductsNum => {
+            allItems = allProductsNum;
+            return Product.find()
+                .skip((page - 1) * ItemsPerPage)
+                .limit(ItemsPerPage)
+        })
+        .then(product => {
+            res.render('shop/index', {
+                path: '/',
+                pageTitle: 'Shop',
+                prods: product,
+                isAuthenticated: req.session.isLoggedin,
+                successMassage: massage,
+                currentPage: page,
+                hasNextPage: page * ItemsPerPage < allItems,
+                hasprevieusPage: page > 1,
+                nextPage: page + 1,
+                previeusPage: page - 1,
+                lastPage: Math.ceil(allItems / ItemsPerPage)
+            });
+        }).catch(err => {
 
-        const error = new Error(err)
-        error.httpStatusCode = 500;
-        return next(error)
+            const error = new Error(err)
+            error.httpStatusCode = 500;
+            return next(error)
 
-    })
+        })
 }
 exports.getProduct = (req, res) => {
     let prodId = req.params.productId
@@ -147,7 +165,6 @@ exports.getOrder = (req, res, next) => {
 
     })
 }
-
 exports.getInvoices = (req, res, next) => {
     let orderId = req.params.orderId;
 

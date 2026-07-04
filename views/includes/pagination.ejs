@@ -1,0 +1,17 @@
+  <nav aria-label="Page navigation example">
+    <div class="d-flex justify-content-center">
+    <ul class="pagination ">
+      <% if(hasprevieusPage) { %>
+      <li class="page-item"><a class="page-link" href="?page=<%= previeusPage %>"><<</a></li>
+        <% } %>
+       <% if (currentPage !== 1) { %> 
+       <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+        <% } %>
+       <li class="page-item active"><a class="page-link" href="?page=<%= currentPage %>"><%= currentPage %></a></li>
+      <% if(hasNextPage) { %>
+      <li class="page-item"><a class="page-link" href="?page=<%= nextPage %>">>></a></li>
+      <li class="page-item"><a class="page-link" href="?page=<%= lastPage %>">Last Page</a></li>
+        <% } %>
+    </ul>
+    </div>
+  </nav>
