@@ -1,7 +1,7 @@
 const { csrfSync } = require('csrf-sync')
 
 const { csrfSynchronisedProtection, generateToken } = csrfSync({
-    getTokenFromRequest: (req) => req.body['_csrf']
+    getTokenFromRequest: (req) => req.headers['x-csrf-token'] || req.body?.['_csrf']
 })
 
 

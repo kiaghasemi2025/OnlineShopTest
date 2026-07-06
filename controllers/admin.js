@@ -211,8 +211,8 @@ exports.postEditProduct = (req, res, next) => {
         }
     )
 }
-exports.postDeleteProduct = (req, res, next) => {
-    let prodID = req.body.productId
+exports.deleteProduct = (req, res, next) => {
+    let prodID = req.params.productId
 
     Product.findById(prodID).then(
         product => {
@@ -223,14 +223,10 @@ exports.postDeleteProduct = (req, res, next) => {
             return Product.deleteOne({ _id: prodID, userId: req.user._id })
         }).then(product => {
             req.flash('success', 'محصول مورد نظر حذف شد')
-            res.redirect('/admin/products')
+            res.json({message:"Successfully"})
         }).catch(err => {
-            const error = new Error(err)
-            error.httpStatusCode = 500;
-            return next(error)
+            res.json({message:"Failed To Delete Product"})
         })
-
-
 
 }
 
