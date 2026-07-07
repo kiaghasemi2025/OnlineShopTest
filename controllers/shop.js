@@ -6,6 +6,8 @@ const path = require('path')
 const fs = require('fs')
 const pdfDocument = require('pdfkit')
 const { query } = require('express-validator')
+const zarinpalCheckout = require('zarinpal-checkout')
+let zarinpal = zarinpalCheckout.create('xxxxxx-xxxxxxx-xxxxxxxx-xxxxxx-xxxxx',true)
 const ItemsPerPage = 1
 let allItems;
 
@@ -131,6 +133,29 @@ exports.getCheckout = async (req,res) => {
         totalPrice:totalPrice
     }) 
 }
+exports.getPaymentRequest = async (req,res) => {
+    const user = await req.user.populate('cart.items.productId')
+    const products = user.cart.items;
+    let totalPrice = 0;
+    products.forEach(p => {
+        totalPrice+=p.quantity*p.productId.price
+    })
+
+    zarinpal.PaymentRequest({
+        Amount:totalPrice,
+        CallbackURL:'http://127.0.0.1:4000',
+        Email:user.email,
+        Mobile:'09900000000',
+        Description:'در حال تست کردن درگاه پرداخت'
+    }).then(response => {
+        console.log(response);
+        res.redirect(response.url)   
+    }).catch(err => {
+        console.log(err);   
+    })
+
+}
+
 exports.postOrder = (req, res, next) => {
     req.user.populate('cart.items.productId')
         .then(user => {
